@@ -11,7 +11,29 @@ st.write(
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('The name on your Smoothie will be: ', name_on_order)
 
-cnx = st.connection("snowflake")
+
+totp = st.text_input(
+    "Enter your Snowflake MFA code",
+    type="password",
+    max_chars=6,
+)
+
+if totp:
+    try:
+        cnx = st.connection(
+            "snowflake",
+            passcode=totp,
+        )
+
+        # result = cnx.query(
+        #     "SELECT CURRENT_USER(), CURRENT_ROLE(), CURRENT_DATABASE()"
+        # )
+        # st.dataframe(result)
+
+    except Exception as exc:
+        st.error(f"Snowflake connection failed: {exc}")
+        
+# cnx = st.connection("snowflake")
 session = cnx.session()
 
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
